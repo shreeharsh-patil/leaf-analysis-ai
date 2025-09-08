@@ -240,7 +240,22 @@ export default function LeafyAiClient() {
     </div>
   );
 
-  const renderResults = () => (
+  const getConfidenceInfo = (confidence: number) => {
+    if (confidence > 0.85) {
+      return { level: "High Confidence", color: "text-primary" };
+    }
+    if (confidence > 0.6) {
+      return { level: "Medium Confidence", color: "text-yellow-400" };
+    }
+    return { level: "Low Confidence", color: "text-orange-500" };
+  };
+
+  const renderResults = () => {
+    const confidence = predictionResult?.confidence ?? 0;
+    const confidenceInfo = getConfidenceInfo(confidence);
+    const diagnosisLevel = predictionResult?.isHealthy ? "Confirmed" : confidence > 0.85 ? "Confirmed" : "Possible";
+      
+    return (
       <div className="flex flex-col gap-6 animate-in fade-in-50 duration-500">
         <Card className="shadow-2xl shadow-black/20 border border-border/20 bg-card/20 backdrop-blur-xl rounded-3xl">
             <CardHeader className="pb-4">
@@ -249,10 +264,17 @@ export default function LeafyAiClient() {
                         <CardTitle className="text-4xl font-bold mb-2">
                             {predictionResult?.isHealthy ? 'Healthy' : predictionResult?.name}
                         </CardTitle>
-                        <Badge variant={predictionResult?.isHealthy ? "default" : "destructive"} className="text-sm bg-opacity-20 text-opacity-100 border-opacity-30">
-                            {predictionResult?.isHealthy ? <CheckCircle2 className="mr-2 h-4 w-4" /> : <Info className="mr-2 h-4 w-4" />}
-                            {((predictionResult?.confidence ?? 0) * 100).toFixed(1)}% Confidence
-                        </Badge>
+                         <div className="flex items-center gap-4">
+                            <Badge variant={predictionResult?.isHealthy ? "default" : "destructive"} className="text-sm bg-opacity-20 text-opacity-100 border-opacity-30">
+                                {predictionResult?.isHealthy ? <CheckCircle2 className="mr-2 h-4 w-4" /> : <Info className="mr-2 h-4 w-4" />}
+                                Diagnosis: {diagnosisLevel}
+                            </Badge>
+                             {!predictionResult?.isHealthy && (
+                                <span className={cn("text-sm font-medium", confidenceInfo.color)}>
+                                    {confidenceInfo.level}
+                                </span>
+                            )}
+                        </div>
                     </div>
                      <Button onClick={handleReset} variant="ghost" size="icon" className="rounded-full h-10 w-10">
                         <X className="h-6 w-6" />
@@ -288,7 +310,7 @@ export default function LeafyAiClient() {
         )}
         {!predictionResult?.isHealthy && renderQuestionSection()}
       </div>
-  )
+  )};
 
   const renderQuestionSection = () => (
     <div className="flex flex-col gap-6">
