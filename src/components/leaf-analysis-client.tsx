@@ -13,7 +13,8 @@ import {
   X,
   Info,
   ScanLine,
-  Bot
+  Bot,
+  HelpingHand
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,6 +36,7 @@ type PredictionResult = {
   confidence: number;
   summary: string;
   treatments: string[];
+  causes: string[];
   isHealthy: boolean;
 };
 
@@ -122,6 +124,7 @@ export default function LeafAnalysisClient() {
           confidence: result.diagnosis.confidence,
           summary: "The leaf appears to be healthy.",
           treatments: [],
+          causes: [],
           isHealthy: true,
         });
       } else {
@@ -287,27 +290,39 @@ export default function LeafAnalysisClient() {
             </CardContent>
         </Card>
 
-        {!predictionResult?.isHealthy && predictionResult?.treatments && predictionResult?.treatments.length > 0 && (
-            <Card className="shadow-2xl shadow-black/20 border border-border/20 bg-card/20 backdrop-blur-xl rounded-3xl">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-3 text-2xl">
-                        <Stethoscope className="text-primary"/>
-                        Suggested Treatments
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Accordion type="single" collapsible className="w-full">
-                        {predictionResult?.treatments.map((treatment, index) => (
-                            <AccordionItem value={`item-${index}`} key={index}>
-                                <AccordionTrigger className="text-lg">Treatment #{index + 1}</AccordionTrigger>
-                                <AccordionContent className="text-base text-muted-foreground">
-                                    {treatment}
-                                </AccordionContent>
-                            </AccordionItem>
-                        ))}
-                    </Accordion>
-                </CardContent>
-            </Card>
+        {!predictionResult?.isHealthy && (
+          <div className="grid md:grid-cols-2 gap-6">
+            {predictionResult?.causes && predictionResult?.causes.length > 0 && (
+                <Card className="shadow-2xl shadow-black/20 border border-border/20 bg-card/20 backdrop-blur-xl rounded-3xl">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-3 text-2xl">
+                            <HelpingHand className="text-primary"/>
+                            Common Causes
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ul className="list-disc pl-5 text-muted-foreground space-y-2">
+                           {predictionResult.causes.map((cause, index) => <li key={index}>{cause}</li>)}
+                        </ul>
+                    </CardContent>
+                </Card>
+            )}
+            {predictionResult?.treatments && predictionResult?.treatments.length > 0 && (
+                <Card className="shadow-2xl shadow-black/20 border border-border/20 bg-card/20 backdrop-blur-xl rounded-3xl">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-3 text-2xl">
+                            <Stethoscope className="text-primary"/>
+                            Suggested Treatments
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                         <ul className="list-disc pl-5 text-muted-foreground space-y-2">
+                           {predictionResult.treatments.map((treatment, index) => <li key={index}>{treatment}</li>)}
+                        </ul>
+                    </CardContent>
+                </Card>
+            )}
+          </div>
         )}
         {!predictionResult?.isHealthy && renderQuestionSection()}
       </div>
@@ -388,4 +403,5 @@ export default function LeafAnalysisClient() {
     </section>
   );
 }
+
 

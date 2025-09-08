@@ -7,7 +7,7 @@ import { answerQuestion, type AnswerQuestionInput } from "@/ai/flows/answer-ques
 /**
  * Fetches disease summary and treatment suggestions from AI flows.
  * @param diseaseName The name of the disease to look up.
- * @returns An object containing the disease summary and a list of treatments.
+ * @returns An object containing the disease summary, causes, symptoms, and a list of treatments.
  */
 export async function getDiseaseInfo(diseaseName: string) {
   try {
@@ -18,6 +18,8 @@ export async function getDiseaseInfo(diseaseName: string) {
 
     return {
       summary: summaryResult.summary,
+      causes: summaryResult.causes,
+      symptoms: summaryResult.symptoms,
       treatments: treatmentsResult.treatments,
     };
   } catch (error) {
