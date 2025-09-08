@@ -187,7 +187,8 @@ export default function LeafAnalysisClient() {
       className={cn(
         "relative flex flex-col items-center justify-center w-full h-full p-8 border-2 border-dashed rounded-3xl transition-all duration-300",
         "bg-card/5 border-border/20 backdrop-blur-sm",
-        isDragging ? "border-primary bg-primary/10 shadow-lg shadow-primary/20 scale-105" : "hover:border-primary/50"
+        isDragging ? "border-primary bg-primary/10 shadow-lg shadow-primary/20 scale-105" : "hover:border-primary/50",
+        "animate-in fade-in-50 zoom-in-95 duration-500"
       )}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
@@ -213,7 +214,7 @@ export default function LeafAnalysisClient() {
   );
 
   const renderAnalysisState = () => (
-    <div className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+    <div className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 animate-in fade-in-50 duration-500">
         <div className="relative aspect-square w-full max-w-lg mx-auto md:max-w-none rounded-3xl overflow-hidden shadow-2xl shadow-black/20 border border-border/20">
             {image && <Image src={image} alt="Uploaded leaf" layout="fill" objectFit="cover" />}
             {isLoading && (
@@ -226,7 +227,7 @@ export default function LeafAnalysisClient() {
         </div>
         <div className="flex flex-col gap-6 justify-center">
             {!predictionResult && !isLoading && (
-                <div className="flex flex-col items-center justify-center h-full gap-4 p-8 bg-card/10 backdrop-blur-lg rounded-3xl shadow-lg border border-border/10">
+                <div className="flex flex-col items-center justify-center h-full gap-4 p-8 bg-card/10 backdrop-blur-lg rounded-3xl shadow-lg border border-border/10 animate-in fade-in-50 duration-500">
                     <Leaf className="w-16 h-16 text-primary" />
                     <h2 className="text-3xl font-bold">Ready to Analyze</h2>
                     <p className="text-muted-foreground text-center max-w-sm">Click the button below to start the AI-powered disease prediction.</p>

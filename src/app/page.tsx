@@ -4,15 +4,15 @@ import { Leaf, ArrowRight } from 'lucide-react';
 
 export default function IntroPage() {
   return (
-    <div className="flex flex-col min-h-screen items-center justify-center bg-background text-foreground p-4">
-      <div className="text-center space-y-4">
+    <div className="flex flex-col min-h-screen items-center justify-center bg-background text-foreground p-4 overflow-hidden">
+      <div className="text-center space-y-4 animate-in fade-in-down duration-1000">
         <Leaf className="mx-auto h-16 w-16 text-primary" />
         <h1 className="text-5xl font-bold tracking-tighter">Leaf Analysis</h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
           Your AI-powered assistant for detecting plant diseases. Upload an image of a leaf to get started.
         </p>
       </div>
-      <div className="mt-8">
+      <div className="mt-8 animate-in fade-in-up duration-1000 delay-300">
         <Button asChild size="lg">
           <Link href="/analysis">
             Start Analysis
