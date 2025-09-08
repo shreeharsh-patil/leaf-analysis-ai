@@ -75,9 +75,10 @@ const prompt = ai.definePrompt({
   tools: [getTreatmentsTool],
   prompt: `You are an expert in plant diseases. Your task is to provide treatment suggestions for a given plant disease.
 
-  Use the 'getTreatmentsForDisease' tool to fetch the treatments for the disease named: {{{diseaseName}}}
+  First, use the 'getTreatmentsForDisease' tool to fetch the treatments for the disease named: {{{diseaseName}}}
 
-  If the tool returns an empty list, state that no specific treatments are available in the database for this disease. Otherwise, return the treatments provided by the tool.
+  - If the tool returns a list of treatments, output those treatments.
+  - If the tool returns an empty list, use your general knowledge to suggest 3-4 common treatments for "{{{diseaseName}}}".
   `,
 });
 
