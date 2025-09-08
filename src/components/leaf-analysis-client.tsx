@@ -202,9 +202,6 @@ export default function LeafAnalysisClient() {
           Upload an image to get an AI-powered analysis of your plant's health.
         </p>
       </div>
-       <p className="text-xs text-muted-foreground/50 mt-4 text-center absolute bottom-8">
-        Disclaimer: This tool is for informational purposes only and is not a substitute for professional advice.
-      </p>
       <input
         type="file"
         ref={fileInputRef}
@@ -405,3 +402,5 @@ export default function LeafAnalysisClient() {
 }
 
 
+
+    
