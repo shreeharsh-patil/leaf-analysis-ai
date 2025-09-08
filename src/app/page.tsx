@@ -1,21 +1,26 @@
-import { Leaf } from 'lucide-react';
-import LeafyAiClient from '@/components/leafy-ai-client';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Leaf, ArrowRight } from 'lucide-react';
 
-export default function Home() {
+export default function IntroPage() {
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="sticky top-0 z-10 w-full border-b bg-background/80 backdrop-blur-sm">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
-          <div className="flex items-center gap-2">
-            <Leaf className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold tracking-tight">LeafyAI</h1>
-          </div>
-        </div>
-      </header>
-      <main className="flex-1">
-        <LeafyAiClient />
-      </main>
-      <footer className="py-6 md:px-8 md:py-0">
+    <div className="flex flex-col min-h-screen items-center justify-center bg-background text-foreground p-4">
+      <div className="text-center space-y-4">
+        <Leaf className="mx-auto h-16 w-16 text-primary" />
+        <h1 className="text-5xl font-bold tracking-tighter">Leaf Analysis</h1>
+        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          Your AI-powered assistant for detecting plant diseases. Upload an image of a leaf to get started.
+        </p>
+      </div>
+      <div className="mt-8">
+        <Button asChild size="lg">
+          <Link href="/analysis">
+            Start Analysis
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Link>
+        </Button>
+      </div>
+       <footer className="absolute bottom-0 py-6 md:px-8 md:py-0">
         <div className="container flex flex-col items-center justify-center gap-4 md:h-24 md:flex-row">
           <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
             Built with Next.js and Genkit.
