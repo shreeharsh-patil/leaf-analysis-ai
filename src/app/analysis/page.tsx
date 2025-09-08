@@ -1,5 +1,5 @@
 import { Leaf } from 'lucide-react';
-import LeafyAiClient from '@/components/leafy-ai-client';
+import LeafAnalysisClient from '@/components/leaf-analysis-client';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
@@ -12,7 +12,7 @@ export default function AnalysisPage() {
             <div className="bg-background/50 backdrop-blur-sm p-2 rounded-full border border-transparent group-hover:border-primary/50 transition-colors">
               <Leaf className="h-6 w-6 text-primary" />
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-foreground/80 group-hover:text-foreground transition-colors">LeafyAI</h1>
+            <h1 className="text-xl font-bold tracking-tight text-foreground/80 group-hover:text-foreground transition-colors">Leaf Analysis</h1>
           </Link>
           <Button variant="ghost" asChild>
             <Link href="/">Home</Link>
@@ -20,7 +20,7 @@ export default function AnalysisPage() {
         </div>
       </header>
       <main className="flex-1">
-        <LeafyAiClient />
+        <LeafAnalysisClient />
       </main>
       <footer className="py-6 md:px-8 md:py-0">
         <div className="container flex flex-col items-center justify-center gap-4 md:h-24 md:flex-row">
