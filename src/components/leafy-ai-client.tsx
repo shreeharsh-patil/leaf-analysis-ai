@@ -4,14 +4,14 @@ import { useState, useRef, type DragEvent, type ChangeEvent } from "react";
 import Image from "next/image";
 import {
   UploadCloud,
-  Camera,
   Loader2,
   Leaf,
   Sparkles,
   Stethoscope,
   CheckCircle2,
   X,
-  Info
+  Info,
+  ScanLine
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -106,7 +106,7 @@ export default function LeafyAiClient() {
       const result = await analyzeImage({ photoDataUri: image });
       
       const isHealthy = result.diagnosis.isHealthy;
-      const diseaseName = result.identification.commonName;
+      const diseaseName = result.diagnosis.disease || result.identification.commonName;
 
       if (isHealthy) {
         setPredictionResult({
@@ -146,8 +146,9 @@ export default function LeafyAiClient() {
   const renderInitialState = () => (
     <div
       className={cn(
-        "relative flex flex-col items-center justify-center w-full max-w-2xl mx-auto p-8 border-2 border-dashed rounded-xl transition-all duration-300",
-        isDragging ? "border-primary bg-primary/10 shadow-lg shadow-primary/20" : "border-border hover:border-primary/50"
+        "relative flex flex-col items-center justify-center w-full h-full p-8 border-2 border-dashed rounded-3xl transition-all duration-300",
+        "bg-card/5 border-border/20 backdrop-blur-sm",
+        isDragging ? "border-primary bg-primary/10 shadow-lg shadow-primary/20 scale-105" : "hover:border-primary/50"
       )}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
@@ -155,14 +156,14 @@ export default function LeafyAiClient() {
       onDrop={handleDrop}
       onClick={handleBrowseClick}
     >
-      <div className="text-center cursor-pointer">
-        <UploadCloud className="w-16 h-16 text-muted-foreground mx-auto mb-4 transition-transform group-hover:scale-110" />
-        <h2 className="text-2xl font-bold mb-2">Tap here or drop a leaf photo</h2>
-        <p className="text-muted-foreground mb-6">
+      <div className="text-center cursor-pointer group">
+        <ScanLine className="w-24 h-24 text-muted-foreground/50 mx-auto mb-6 transition-all duration-300 group-hover:scale-110 group-hover:text-primary" />
+        <h2 className="text-3xl font-bold mb-2">Tap here or drop a leaf photo</h2>
+        <p className="text-muted-foreground mb-6 text-lg">
           Upload an image to get an AI-powered analysis of your plant's health.
         </p>
       </div>
-       <p className="text-xs text-muted-foreground/50 mt-4 text-center">
+       <p className="text-xs text-muted-foreground/50 mt-4 text-center absolute bottom-8">
         Disclaimer: This tool is for informational purposes only and is not a substitute for professional advice.
       </p>
       <input
@@ -176,24 +177,25 @@ export default function LeafyAiClient() {
   );
 
   const renderAnalysisState = () => (
-    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="relative aspect-square w-full max-w-lg mx-auto md:max-w-none rounded-xl overflow-hidden shadow-lg border border-border">
+    <div className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+        <div className="relative aspect-square w-full max-w-lg mx-auto md:max-w-none rounded-3xl overflow-hidden shadow-2xl shadow-black/20 border border-border/20">
             {image && <Image src={image} alt="Uploaded leaf" layout="fill" objectFit="cover" />}
             {isLoading && (
                 <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center gap-4 text-foreground z-10 backdrop-blur-sm">
                     <Loader2 className="h-12 w-12 animate-spin text-primary" />
                     <p className="text-lg font-semibold">Analyzing leaf...</p>
+                    <p className="text-sm text-muted-foreground">This may take a moment...</p>
                 </div>
             )}
         </div>
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 justify-center">
             {!predictionResult && !isLoading && (
-                <div className="flex flex-col items-center justify-center h-full gap-4 p-8 bg-card rounded-xl shadow-lg border border-border">
+                <div className="flex flex-col items-center justify-center h-full gap-4 p-8 bg-card/10 backdrop-blur-lg rounded-3xl shadow-lg border border-border/10">
                     <Leaf className="w-16 h-16 text-primary" />
-                    <h2 className="text-2xl font-bold">Ready to Analyze</h2>
-                    <p className="text-muted-foreground text-center">Click the button below to start the AI-powered disease prediction.</p>
-                    <Button onClick={handleAnalyze} size="lg">
-                        <Sparkles className="mr-2 h-5 w-5" />
+                    <h2 className="text-3xl font-bold">Ready to Analyze</h2>
+                    <p className="text-muted-foreground text-center max-w-sm">Click the button below to start the AI-powered disease prediction.</p>
+                    <Button onClick={handleAnalyze} size="lg" className="mt-4 text-lg py-7 px-10 rounded-full shadow-lg shadow-primary/20">
+                        <Sparkles className="mr-3 h-6 w-6" />
                         Analyze Leaf
                     </Button>
                 </div>
@@ -205,11 +207,11 @@ export default function LeafyAiClient() {
 
   const renderResults = () => (
       <div className="flex flex-col gap-6 animate-in fade-in-50 duration-500">
-        <Card className="shadow-lg border border-border">
+        <Card className="shadow-2xl shadow-black/20 border border-border/20 bg-card/20 backdrop-blur-xl rounded-3xl">
             <CardHeader className="pb-4">
                 <div className="flex justify-between items-start">
                     <div>
-                        <CardTitle className="text-3xl font-bold mb-2">
+                        <CardTitle className="text-4xl font-bold mb-2">
                             {predictionResult?.isHealthy ? 'Healthy' : predictionResult?.name}
                         </CardTitle>
                         <Badge variant={predictionResult?.isHealthy ? "default" : "destructive"} className="text-sm bg-opacity-20 text-opacity-100 border-opacity-30">
@@ -217,20 +219,20 @@ export default function LeafyAiClient() {
                             {((predictionResult?.confidence ?? 0) * 100).toFixed(1)}% Confidence
                         </Badge>
                     </div>
-                     <Button onClick={handleReset} variant="ghost" size="icon">
-                        <X className="h-5 w-5" />
+                     <Button onClick={handleReset} variant="ghost" size="icon" className="rounded-full h-10 w-10">
+                        <X className="h-6 w-6" />
                     </Button>
                 </div>
             </CardHeader>
             <CardContent>
-                <p className="text-muted-foreground">{predictionResult?.summary}</p>
+                <p className="text-muted-foreground text-base">{predictionResult?.summary}</p>
             </CardContent>
         </Card>
 
         {!predictionResult?.isHealthy && predictionResult?.treatments && predictionResult?.treatments.length > 0 && (
-            <Card className="shadow-lg border border-border">
+            <Card className="shadow-2xl shadow-black/20 border border-border/20 bg-card/20 backdrop-blur-xl rounded-3xl">
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-3 text-2xl">
                         <Stethoscope className="text-primary"/>
                         Suggested Treatments
                     </CardTitle>
@@ -239,8 +241,8 @@ export default function LeafyAiClient() {
                     <Accordion type="single" collapsible className="w-full">
                         {predictionResult?.treatments.map((treatment, index) => (
                             <AccordionItem value={`item-${index}`} key={index}>
-                                <AccordionTrigger>Treatment #{index + 1}</AccordionTrigger>
-                                <AccordionContent className="text-base">
+                                <AccordionTrigger className="text-lg">Treatment #{index + 1}</AccordionTrigger>
+                                <AccordionContent className="text-base text-muted-foreground">
                                     {treatment}
                                 </AccordionContent>
                             </AccordionItem>
@@ -253,8 +255,19 @@ export default function LeafyAiClient() {
   )
 
   return (
-    <section className="container mx-auto px-4 md:px-6 py-12">
-        <div className="flex items-center justify-center min-h-[60vh]">
+    <section className="relative container mx-auto px-4 md:px-6 py-12 min-h-screen flex flex-col items-center justify-center">
+       <div 
+        className="absolute inset-0 z-0 opacity-20"
+        style={{
+          backgroundImage: 'url(https://picsum.photos/1920/1080)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+        data-ai-hint="leaf macro"
+      />
+      <div className="absolute inset-0 z-10 bg-gradient-to-b from-background/50 via-background to-background" />
+
+        <div className="relative z-20 flex items-center justify-center w-full min-h-[calc(100vh-10rem)] max-w-5xl">
             {image ? renderAnalysisState() : renderInitialState()}
         </div>
     </section>
