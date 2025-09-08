@@ -11,7 +11,8 @@ import {
   CheckCircle2,
   X,
   Info,
-  ScanLine
+  ScanLine,
+  Bot
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,9 +24,10 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
-import { getDiseaseInfo } from "@/app/actions";
+import { getDiseaseInfo, askQuestionAboutDisease } from "@/app/actions";
 import { cn } from "@/lib/utils";
 import { analyzeImage } from "@/ai/flows/analyze-image-flow";
+import { Textarea } from "@/components/ui/textarea";
 
 type PredictionResult = {
   name: string;
@@ -41,6 +43,9 @@ export default function LeafyAiClient() {
   const [isLoading, setIsLoading] = useState(false);
   const [predictionResult, setPredictionResult] =
     useState<PredictionResult | null>(null);
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState<string | null>(null);
+  const [isAsking, setIsAsking] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -51,6 +56,8 @@ export default function LeafyAiClient() {
       reader.onload = (e) => {
         setImage(e.target?.result as string);
         setPredictionResult(null);
+        setAnswer(null);
+        setQuestion("");
       };
       reader.readAsDataURL(file);
     } else {
@@ -137,10 +144,38 @@ export default function LeafyAiClient() {
     }
   };
   
+  const handleAskQuestion = async () => {
+    if (!question || !predictionResult) return;
+
+    setIsAsking(true);
+    setAnswer(null);
+
+    try {
+      const result = await askQuestionAboutDisease({
+        diseaseName: predictionResult.name,
+        summary: predictionResult.summary,
+        treatments: predictionResult.treatments,
+        question: question,
+      });
+      setAnswer(result.answer);
+    } catch (error) {
+      console.error("Failed to ask question:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to get an answer. Please try again.",
+      });
+    } finally {
+      setIsAsking(false);
+    }
+  };
+
   const handleReset = () => {
       setImage(null);
       setPredictionResult(null);
       setIsLoading(false);
+      setAnswer(null);
+      setQuestion("");
   }
 
   const renderInitialState = () => (
@@ -251,8 +286,65 @@ export default function LeafyAiClient() {
                 </CardContent>
             </Card>
         )}
+        {!predictionResult?.isHealthy && renderQuestionSection()}
       </div>
   )
+
+  const renderQuestionSection = () => (
+    <div className="flex flex-col gap-6">
+      <Card className="shadow-2xl shadow-black/20 border border-border/20 bg-card/20 backdrop-blur-xl rounded-3xl">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3 text-2xl">
+            <Bot className="text-primary" />
+            Ask a Follow-up Question
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <Textarea
+            placeholder="e.g., How often should I apply the treatment?"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            disabled={isAsking}
+          />
+          <Button onClick={handleAskQuestion} disabled={!question || isAsking}>
+            {isAsking ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Asking...
+              </>
+            ) : (
+              "Ask AI"
+            )}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {isAsking && (
+        <Card className="shadow-2xl shadow-black/20 border border-border/20 bg-card/20 backdrop-blur-xl rounded-3xl">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-4">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              <p className="text-muted-foreground">Generating answer...</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {answer && (
+        <Card className="shadow-2xl shadow-black/20 border border-border/20 bg-card/20 backdrop-blur-xl rounded-3xl animate-in fade-in-50 duration-500">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3 text-2xl">
+              AI Answer
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">{answer}</p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+
 
   return (
     <section className="relative container mx-auto px-4 md:px-6 py-12 min-h-screen flex flex-col items-center justify-center">
