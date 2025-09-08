@@ -8,8 +8,51 @@
  * - SuggestTreatmentsForDiseaseOutput - The return type for the suggestTreatmentsForDisease function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
+
+// Simulated database of treatments
+const treatmentDatabase: Record<string, string[]> = {
+  "early blight": [
+    "Remove affected leaves and stems.",
+    "Ensure good air circulation around the plants.",
+    "Apply a copper-based fungicide.",
+  ],
+  "late blight": [
+    "Destroy infected plants to prevent spread.",
+    "Apply fungicides preventively, especially in cool, moist conditions.",
+    "Choose resistant plant varieties.",
+  ],
+  "powdery mildew": [
+    "Increase air circulation and reduce humidity.",
+    "Spray with a solution of potassium bicarbonate or neem oil.",
+    "Remove and destroy infected plant parts.",
+  ],
+  "black spot": [
+    "Prune and destroy infected leaves and canes.",
+    "Water at the base of the plant to keep leaves dry.",
+    "Apply a fungicide containing chlorothalonil or myclobutanil.",
+  ],
+  "rust": [
+    "Remove and destroy infected leaves at the first sign of disease.",
+    "Avoid overhead watering.",
+    "Apply a sulfur or copper-based fungicide.",
+  ],
+};
+
+const getTreatmentsTool = ai.defineTool(
+  {
+    name: 'getTreatmentsForDisease',
+    description: 'Get a list of treatments for a specific plant disease from the database.',
+    inputSchema: z.object({ disease: z.string().describe('The name of the disease') }),
+    outputSchema: z.array(z.string()).describe('A list of treatments.'),
+  },
+  async (input) => {
+    const disease = input.disease.toLowerCase();
+    return treatmentDatabase[disease] || [];
+  }
+);
+
 
 const SuggestTreatmentsForDiseaseInputSchema = z.object({
   diseaseName: z.string().describe('The name of the plant disease.'),
@@ -29,13 +72,13 @@ const prompt = ai.definePrompt({
   name: 'suggestTreatmentsForDiseasePrompt',
   input: {schema: SuggestTreatmentsForDiseaseInputSchema},
   output: {schema: SuggestTreatmentsForDiseaseOutputSchema},
-  prompt: `You are an expert in plant diseases and their treatments.
+  tools: [getTreatmentsTool],
+  prompt: `You are an expert in plant diseases. Your task is to provide treatment suggestions for a given plant disease.
 
-  Provide a list of potential treatments for the following disease:
+  Use the 'getTreatmentsForDisease' tool to fetch the treatments for the disease named: {{{diseaseName}}}
 
-  Disease: {{{diseaseName}}}
-
-  Treatments:`, // Ensure the AI provides a treatments output with no leading characters.
+  If the tool returns an empty list, state that no specific treatments are available in the database for this disease. Otherwise, return the treatments provided by the tool.
+  `,
 });
 
 const suggestTreatmentsForDiseaseFlow = ai.defineFlow(
@@ -45,7 +88,7 @@ const suggestTreatmentsForDiseaseFlow = ai.defineFlow(
     outputSchema: SuggestTreatmentsForDiseaseOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const { output } = await prompt(input);
     return output!;
   }
 );
