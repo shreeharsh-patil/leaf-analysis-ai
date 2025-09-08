@@ -25,6 +25,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { getDiseaseInfo } from "@/app/actions";
 import { cn } from "@/lib/utils";
+import { analyzeImage } from "@/ai/flows/analyze-image-flow";
 
 type PredictionResult = {
   name: string;
@@ -33,19 +34,6 @@ type PredictionResult = {
   treatments: string[];
   isHealthy: boolean;
 };
-
-// Mock disease names similar to PlantVillage dataset
-const DISEASES = [
-  "Apple___Apple_scab",
-  "Apple___Black_rot",
-  "Corn_(maize)___Common_rust_",
-  "Grape___Black_rot",
-  "Potato___Early_blight",
-  "Potato___Late_blight",
-  "Tomato___Bacterial_spot",
-  "Tomato___Leaf_Mold",
-  "Healthy",
-];
 
 export default function LeafyAiClient() {
   const [image, setImage] = useState<string | null>(null);
@@ -109,45 +97,44 @@ export default function LeafyAiClient() {
   };
 
   const handleAnalyze = async () => {
+    if (!image) return;
+
     setIsLoading(true);
     setPredictionResult(null);
 
-    // Simulate model prediction delay
-    setTimeout(async () => {
-      try {
-        // Mocked prediction
-        const predictedDisease =
-          DISEASES[Math.floor(Math.random() * DISEASES.length)];
-        const confidence = Math.random() * (0.98 - 0.85) + 0.85;
+    try {
+      const result = await analyzeImage({ photoDataUri: image });
+      
+      const isHealthy = result.diagnosis.isHealthy;
+      const diseaseName = result.identification.commonName;
 
-        if (predictedDisease === "Healthy") {
-          setPredictionResult({
-            name: "Healthy",
-            confidence,
-            summary: "The leaf appears to be healthy.",
-            treatments: [],
-            isHealthy: true,
-          });
-        } else {
-          const diseaseInfo = await getDiseaseInfo(predictedDisease);
-          setPredictionResult({
-            name: predictedDisease.replace(/___/g, " - ").replace(/_/g, " "),
-            confidence,
-            ...diseaseInfo,
-            isHealthy: false,
-          });
-        }
-      } catch (error) {
-        console.error("Analysis failed:", error);
-        toast({
-          variant: "destructive",
-          title: "Analysis Failed",
-          description: "Could not get disease information. Please try again.",
+      if (isHealthy) {
+        setPredictionResult({
+          name: "Healthy",
+          confidence: result.diagnosis.confidence,
+          summary: "The leaf appears to be healthy.",
+          treatments: [],
+          isHealthy: true,
         });
-      } finally {
-        setIsLoading(false);
+      } else {
+        const diseaseInfo = await getDiseaseInfo(diseaseName);
+        setPredictionResult({
+          name: diseaseName,
+          confidence: result.diagnosis.confidence,
+          ...diseaseInfo,
+          isHealthy: false,
+        });
       }
-    }, 2000);
+    } catch (error) {
+      console.error("Analysis failed:", error);
+      toast({
+        variant: "destructive",
+        title: "Analysis Failed",
+        description: "Could not analyze the image. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   const handleReset = () => {
@@ -159,29 +146,25 @@ export default function LeafyAiClient() {
   const renderInitialState = () => (
     <div
       className={cn(
-        "relative flex flex-col items-center justify-center w-full max-w-2xl mx-auto p-8 border-2 border-dashed rounded-xl transition-colors duration-300",
-        isDragging ? "border-primary bg-primary/10" : "border-gray-300 dark:border-gray-700"
+        "relative flex flex-col items-center justify-center w-full max-w-2xl mx-auto p-8 border-2 border-dashed rounded-xl transition-all duration-300",
+        isDragging ? "border-primary bg-primary/10 shadow-lg shadow-primary/20" : "border-border hover:border-primary/50"
       )}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
+      onClick={handleBrowseClick}
     >
-      <UploadCloud className="w-16 h-16 text-gray-400 mb-4" />
-      <h2 className="text-2xl font-bold mb-2 text-center">Upload Leaf Image</h2>
-      <p className="text-muted-foreground mb-6 text-center">
-        Drag & drop your image here, or click to browse.
-      </p>
-      <div className="flex flex-col sm:flex-row gap-4">
-        <Button onClick={handleBrowseClick} size="lg">
-          <UploadCloud className="mr-2 h-5 w-5" />
-          Browse Files
-        </Button>
-        <Button onClick={handleBrowseClick} size="lg" variant="secondary">
-          <Camera className="mr-2 h-5 w-5" />
-          Use Camera
-        </Button>
+      <div className="text-center cursor-pointer">
+        <UploadCloud className="w-16 h-16 text-muted-foreground mx-auto mb-4 transition-transform group-hover:scale-110" />
+        <h2 className="text-2xl font-bold mb-2">Tap here or drop a leaf photo</h2>
+        <p className="text-muted-foreground mb-6">
+          Upload an image to get an AI-powered analysis of your plant's health.
+        </p>
       </div>
+       <p className="text-xs text-muted-foreground/50 mt-4 text-center">
+        Disclaimer: This tool is for informational purposes only and is not a substitute for professional advice.
+      </p>
       <input
         type="file"
         ref={fileInputRef}
@@ -194,10 +177,10 @@ export default function LeafyAiClient() {
 
   const renderAnalysisState = () => (
     <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="relative aspect-square w-full max-w-lg mx-auto md:max-w-none rounded-xl overflow-hidden shadow-lg">
+        <div className="relative aspect-square w-full max-w-lg mx-auto md:max-w-none rounded-xl overflow-hidden shadow-lg border border-border">
             {image && <Image src={image} alt="Uploaded leaf" layout="fill" objectFit="cover" />}
             {isLoading && (
-                <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-4 text-white z-10">
+                <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center gap-4 text-foreground z-10 backdrop-blur-sm">
                     <Loader2 className="h-12 w-12 animate-spin text-primary" />
                     <p className="text-lg font-semibold">Analyzing leaf...</p>
                 </div>
@@ -205,11 +188,11 @@ export default function LeafyAiClient() {
         </div>
         <div className="flex flex-col gap-6">
             {!predictionResult && !isLoading && (
-                <div className="flex flex-col items-center justify-center h-full gap-4 p-8 bg-card rounded-xl shadow-lg">
+                <div className="flex flex-col items-center justify-center h-full gap-4 p-8 bg-card rounded-xl shadow-lg border border-border">
                     <Leaf className="w-16 h-16 text-primary" />
                     <h2 className="text-2xl font-bold">Ready to Analyze</h2>
                     <p className="text-muted-foreground text-center">Click the button below to start the AI-powered disease prediction.</p>
-                    <Button onClick={handleAnalyze} size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
+                    <Button onClick={handleAnalyze} size="lg">
                         <Sparkles className="mr-2 h-5 w-5" />
                         Analyze Leaf
                     </Button>
@@ -222,14 +205,14 @@ export default function LeafyAiClient() {
 
   const renderResults = () => (
       <div className="flex flex-col gap-6 animate-in fade-in-50 duration-500">
-        <Card className="shadow-lg">
+        <Card className="shadow-lg border border-border">
             <CardHeader className="pb-4">
                 <div className="flex justify-between items-start">
                     <div>
                         <CardTitle className="text-3xl font-bold mb-2">
                             {predictionResult?.isHealthy ? 'Healthy' : predictionResult?.name}
                         </CardTitle>
-                        <Badge variant={predictionResult?.isHealthy ? "default" : "destructive"} className="text-sm">
+                        <Badge variant={predictionResult?.isHealthy ? "default" : "destructive"} className="text-sm bg-opacity-20 text-opacity-100 border-opacity-30">
                             {predictionResult?.isHealthy ? <CheckCircle2 className="mr-2 h-4 w-4" /> : <Info className="mr-2 h-4 w-4" />}
                             {((predictionResult?.confidence ?? 0) * 100).toFixed(1)}% Confidence
                         </Badge>
@@ -245,7 +228,7 @@ export default function LeafyAiClient() {
         </Card>
 
         {!predictionResult?.isHealthy && predictionResult?.treatments && predictionResult?.treatments.length > 0 && (
-            <Card className="shadow-lg">
+            <Card className="shadow-lg border border-border">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Stethoscope className="text-primary"/>
@@ -271,7 +254,7 @@ export default function LeafyAiClient() {
 
   return (
     <section className="container mx-auto px-4 md:px-6 py-12">
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center min-h-[60vh]">
             {image ? renderAnalysisState() : renderInitialState()}
         </div>
     </section>
