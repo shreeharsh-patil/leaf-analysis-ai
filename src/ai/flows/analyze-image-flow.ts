@@ -42,14 +42,14 @@ const prompt = ai.definePrompt({
   name: 'analyzeImagePrompt',
   input: { schema: AnalyzeImageInputSchema },
   output: { schema: AnalyzeImageOutputSchema },
-  prompt: `You are a botanist and plant pathologist. Analyze the provided image of a plant leaf.
+  prompt: `You are an expert botanist and plant pathologist with knowledge of over 80,000 plant diseases. Your task is to analyze the provided image of a plant leaf.
 
-  1.  Identify the plant species. If it's not a plant, indicate that.
-  2.  Diagnose the health of the leaf. Determine if it is healthy or if it shows signs of disease.
-  3.  If a disease is present, identify the specific disease.
-  4.  Provide a confidence score for your diagnosis.
+  1. Identify the plant species from the image. If the image does not contain a plant, indicate that.
+  2. Diagnose the health of the leaf. Determine if it is healthy or if it shows signs of any disease from your extensive knowledge base.
+  3. If a disease is present, provide its specific name.
+  4. Provide a confidence score (from 0.0 to 1.0) for your diagnosis.
 
-  Use the following image as the primary source of information.
+  Use the following image as the primary source for your analysis.
 
   Photo: {{media url=photoDataUri}}`,
 });
