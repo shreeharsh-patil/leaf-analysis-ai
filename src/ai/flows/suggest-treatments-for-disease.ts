@@ -38,6 +38,11 @@ const treatmentDatabase: Record<string, string[]> = {
     "Avoid overhead watering.",
     "Apply a sulfur or copper-based fungicide.",
   ],
+  "downy mildew": [
+    "Improve air circulation to reduce humidity.",
+    "Avoid watering leaves; water the soil instead.",
+    "Apply a fungicide specifically for downy mildew.",
+  ],
 };
 
 const getTreatmentsTool = ai.defineTool(
