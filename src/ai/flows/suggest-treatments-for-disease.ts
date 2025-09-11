@@ -43,6 +43,12 @@ const treatmentDatabase: Record<string, string[]> = {
     "Avoid watering leaves; water the soil instead.",
     "Apply a fungicide specifically for downy mildew.",
   ],
+  "bacterial leaf spot": [
+    "Prune and discard infected leaves.",
+    "Avoid overhead irrigation to keep leaves dry.",
+    "Apply copper-based bactericides as a preventive measure.",
+    "Ensure proper spacing for good air circulation."
+  ],
 };
 
 const getTreatmentsTool = ai.defineTool(
