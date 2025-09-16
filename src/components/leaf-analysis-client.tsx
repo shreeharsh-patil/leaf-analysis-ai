@@ -38,6 +38,7 @@ type PredictionResult = {
   summary: string;
   treatments: string[];
   causes: string[];
+  symptoms: string[];
   isHealthy: boolean;
 };
 
@@ -119,7 +120,6 @@ export default function LeafAnalysisClient() {
       const result = await analyzeImage({ photoDataUri: image });
       
       const isHealthy = result.diagnosis.isHealthy;
-      const diseaseName = result.diagnosis.disease || result.identification.commonName;
 
       if (isHealthy) {
         setPredictionResult({
@@ -128,14 +128,18 @@ export default function LeafAnalysisClient() {
           summary: "The leaf appears to be healthy.",
           treatments: [],
           causes: [],
+          symptoms: [],
           isHealthy: true,
         });
       } else {
-        const diseaseInfo = await getDiseaseInfo(diseaseName);
+        const diseaseName = result.diagnosis.disease || result.identification.commonName;
         setPredictionResult({
           name: diseaseName,
           confidence: result.diagnosis.confidence,
-          ...diseaseInfo,
+          summary: result.diseaseInfo?.summary || "No summary available.",
+          causes: result.diseaseInfo?.causes || [],
+          symptoms: result.diseaseInfo?.symptoms || [],
+          treatments: result.diseaseInfo?.treatments || [],
           isHealthy: false,
         });
       }
