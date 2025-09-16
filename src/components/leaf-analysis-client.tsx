@@ -14,7 +14,8 @@ import {
   Info,
   ScanLine,
   Bot,
-  HelpingHand
+  HelpingHand,
+  ZoomIn
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,6 +50,8 @@ export default function LeafAnalysisClient() {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<string | null>(null);
   const [isAsking, setIsAsking] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
+
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -215,8 +218,28 @@ export default function LeafAnalysisClient() {
 
   const renderAnalysisState = () => (
     <div className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 animate-in fade-in-50 duration-500">
-        <div className="relative aspect-square w-full max-w-lg mx-auto md:max-w-none rounded-3xl overflow-hidden shadow-2xl shadow-black/20 border border-border/20">
-            {image && <Image src={image} alt="Uploaded leaf" layout="fill" objectFit="cover" />}
+        <div 
+          className="group relative aspect-square w-full max-w-lg mx-auto md:max-w-none rounded-3xl overflow-hidden shadow-2xl shadow-black/20 border border-border/20"
+          onMouseEnter={() => setIsZoomed(true)}
+          onMouseLeave={() => setIsZoomed(false)}
+        >
+            {image && (
+              <>
+                <Image 
+                  src={image} 
+                  alt="Uploaded leaf" 
+                  layout="fill" 
+                  objectFit="cover" 
+                  className={cn(
+                    "transition-transform duration-500 ease-in-out",
+                    isZoomed ? "scale-150" : "scale-100"
+                  )}
+                />
+                 <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                  <ZoomIn className="w-12 h-12 text-white/80" />
+                </div>
+              </>
+            )}
             {isLoading && (
                 <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center gap-4 text-foreground z-10 backdrop-blur-sm">
                     <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -403,5 +426,7 @@ export default function LeafAnalysisClient() {
 }
 
 
+
+    
 
     
