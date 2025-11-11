@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent } from "react";
+import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from "react";
 import Image from "next/image";
 import {
   UploadCloud,
@@ -15,22 +15,31 @@ import {
   ScanLine,
   Bot,
   HelpingHand,
-  ZoomIn
+  ZoomIn,
+  History,
+  Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
-import { getDiseaseInfo, askQuestionAboutDisease } from "@/app/actions";
 import { cn } from "@/lib/utils";
 import { analyzeImage } from "@/ai/flows/analyze-image-flow";
 import { Textarea } from "@/components/ui/textarea";
+import { askQuestionAboutDisease } from "@/app/actions";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { formatDistanceToNow } from 'date-fns';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 type PredictionResult = {
   name: string;
@@ -40,6 +49,13 @@ type PredictionResult = {
   causes: string[];
   symptoms: string[];
   isHealthy: boolean;
+};
+
+type HistoryItem = {
+  id: string;
+  image: string;
+  predictionResult: PredictionResult;
+  timestamp: number;
 };
 
 export default function LeafAnalysisClient() {
@@ -52,16 +68,39 @@ export default function LeafAnalysisClient() {
   const [answer, setAnswer] = useState<string | null>(null);
   const [isAsking, setIsAsking] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
+  useEffect(() => {
+    try {
+      const storedHistory = localStorage.getItem("leafAnalysisHistory");
+      if (storedHistory) {
+        setHistory(JSON.parse(storedHistory));
+      }
+    } catch (error) {
+      console.error("Failed to load history from localStorage:", error);
+    }
+  }, []);
+
+  const updateHistory = (newHistory: HistoryItem[]) => {
+    setHistory(newHistory);
+    try {
+      localStorage.setItem("leafAnalysisHistory", JSON.stringify(newHistory));
+    } catch (error) {
+      console.error("Failed to save history to localStorage:", error);
+    }
+  }
+
   const handleFileChange = (file: File | null) => {
     if (file && file.type.startsWith("image/")) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setImage(e.target?.result as string);
+        const newImage = e.target?.result as string;
+        setImage(newImage);
         setPredictionResult(null);
         setAnswer(null);
         setQuestion("");
@@ -120,9 +159,10 @@ export default function LeafAnalysisClient() {
       const result = await analyzeImage({ photoDataUri: image });
       
       const isHealthy = result.diagnosis.isHealthy;
+      let newPrediction: PredictionResult;
 
       if (isHealthy) {
-        setPredictionResult({
+        newPrediction = {
           name: "Healthy",
           confidence: result.diagnosis.confidence,
           summary: "The leaf appears to be healthy.",
@@ -130,10 +170,10 @@ export default function LeafAnalysisClient() {
           causes: [],
           symptoms: [],
           isHealthy: true,
-        });
+        };
       } else {
         const diseaseName = result.diagnosis.disease || result.identification.commonName;
-        setPredictionResult({
+        newPrediction = {
           name: diseaseName,
           confidence: result.diagnosis.confidence,
           summary: result.diseaseInfo?.summary || "No summary available.",
@@ -141,8 +181,18 @@ export default function LeafAnalysisClient() {
           symptoms: result.diseaseInfo?.symptoms || [],
           treatments: result.diseaseInfo?.treatments || [],
           isHealthy: false,
-        });
+        };
       }
+      setPredictionResult(newPrediction);
+
+      const newHistoryItem: HistoryItem = {
+        id: new Date().toISOString(),
+        image,
+        predictionResult: newPrediction,
+        timestamp: Date.now()
+      };
+      updateHistory([newHistoryItem, ...history]);
+
     } catch (error) {
       console.error("Analysis failed:", error);
       toast({
@@ -189,6 +239,20 @@ export default function LeafAnalysisClient() {
       setQuestion("");
   }
 
+  const handleHistoryClick = (item: HistoryItem) => {
+    setImage(item.image);
+    setPredictionResult(item.predictionResult);
+    setAnswer(null);
+    setQuestion("");
+    if (window.innerWidth < 768) {
+      setIsHistoryOpen(false);
+    }
+  };
+
+  const handleClearHistory = () => {
+    updateHistory([]);
+  };
+
   const renderInitialState = () => (
     <div
       className={cn(
@@ -232,7 +296,7 @@ export default function LeafAnalysisClient() {
                 <Image 
                   src={image} 
                   alt="Uploaded leaf" 
-                  layout="fill" 
+                  fill
                   objectFit="cover" 
                   className={cn(
                     "transition-transform duration-500 ease-in-out",
@@ -408,9 +472,110 @@ export default function LeafAnalysisClient() {
     </div>
   );
 
+  const renderHistorySidebar = () => (
+    <>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setIsHistoryOpen(!isHistoryOpen)}
+        className="fixed top-5 right-5 z-50 h-12 w-12 rounded-full bg-background/50 backdrop-blur-sm border border-transparent hover:border-primary/50 transition-colors md:hidden"
+      >
+        <History className="h-6 w-6" />
+      </Button>
+      <div
+        className={cn(
+          "fixed top-0 right-0 h-full z-40 bg-background/80 backdrop-blur-lg border-l border-border/20 transition-transform duration-300 ease-in-out",
+          "w-80 md:w-96",
+          isHistoryOpen ? "translate-x-0" : "translate-x-full"
+        )}
+      >
+        <div className="flex flex-col h-full">
+          <div className="flex items-center justify-between p-4 border-b border-border/20">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <History className="h-6 w-6 text-primary" />
+              Analysis History
+            </h2>
+            <Button variant="ghost" size="icon" onClick={() => setIsHistoryOpen(false)} className="md:hidden">
+              <X className="h-6 w-6" />
+            </Button>
+          </div>
+          <ScrollArea className="flex-1">
+            {history.length > 0 ? (
+              <div className="p-2 space-y-2">
+                {history.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => handleHistoryClick(item)}
+                    className="w-full text-left p-2 rounded-lg hover:bg-primary/10 transition-colors flex items-center gap-4"
+                  >
+                    <Image
+                      src={item.image}
+                      alt="History thumbnail"
+                      width={64}
+                      height={64}
+                      className="rounded-md aspect-square object-cover"
+                    />
+                    <div className="flex-1 overflow-hidden">
+                      <p className="font-semibold truncate">
+                        {item.predictionResult.name}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {formatDistanceToNow(new Date(item.timestamp), { addSuffix: true })}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center p-8 text-muted-foreground">
+                <p>No analysis history yet.</p>
+              </div>
+            )}
+          </ScrollArea>
+          {history.length > 0 && (
+            <div className="p-4 border-t border-border/20">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" className="w-full">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Clear History
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete your analysis history. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleClearHistory}>
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+
 
   return (
     <section className="relative container mx-auto px-4 md:px-6 py-12 min-h-screen flex flex-col items-center justify-center">
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setIsHistoryOpen(true)}
+        className="fixed top-5 right-24 z-50 h-12 w-12 rounded-full bg-background/50 backdrop-blur-sm border border-transparent hover:border-primary/50 transition-colors hidden md:flex"
+      >
+        <History className="h-6 w-6" />
+      </Button>
+      {renderHistorySidebar()}
+
        <div 
         className="absolute inset-0 z-0 opacity-20"
         style={{
@@ -422,15 +587,14 @@ export default function LeafAnalysisClient() {
       />
       <div className="absolute inset-0 z-10 bg-gradient-to-b from-background/50 via-background to-background" />
 
-        <div className="relative z-20 flex items-center justify-center w-full min-h-[calc(100vh-10rem)] max-w-5xl">
+        <div className={cn(
+            "relative z-20 flex items-center justify-center w-full min-h-[calc(100vh-10rem)] max-w-5xl transition-all duration-300 ease-in-out",
+            isHistoryOpen && "md:mr-96"
+        )}>
             {image ? renderAnalysisState() : renderInitialState()}
         </div>
     </section>
   );
 }
-
-
-
-    
 
     

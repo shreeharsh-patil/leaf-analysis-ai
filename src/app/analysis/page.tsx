@@ -14,9 +14,11 @@ export default function AnalysisPage() {
             </div>
             <h1 className="text-xl font-bold tracking-tight text-foreground/80 group-hover:text-foreground transition-colors">Leaf Analysis</h1>
           </Link>
-          <Button variant="ghost" asChild>
-            <Link href="/">Home</Link>
-          </Button>
+          <div className="flex items-center gap-4">
+             <Button variant="ghost" asChild>
+              <Link href="/">Home</Link>
+            </Button>
+          </div>
         </div>
       </header>
       <main className="flex-1">
@@ -30,3 +32,5 @@ export default function AnalysisPage() {
     </div>
   );
 }
+
+    
