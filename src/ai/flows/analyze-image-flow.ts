@@ -24,6 +24,11 @@ const AnalyzeImageInputSchema = z.object({
 });
 export type AnalyzeImageInput = z.infer<typeof AnalyzeImageInputSchema>;
 
+const DiagnosisSchema = z.object({
+    disease: z.string().optional().describe('The name of the disease, if the plant is not healthy.'),
+    confidence: z.number().describe('The confidence score of the diagnosis, from 0.0 to 1.0.'),
+});
+
 const AnalyzeImageOutputSchema = z.object({
   identification: z.object({
     isPlant: z.boolean().describe('Whether or not the image contains a plant.'),
@@ -32,8 +37,8 @@ const AnalyzeImageOutputSchema = z.object({
   }),
   diagnosis: z.object({
     isHealthy: z.boolean().describe('Whether or not the plant appears to be healthy.'),
-    disease: z.string().optional().describe('The name of the disease, if the plant is not healthy.'),
-    confidence: z.number().describe('The confidence score of the diagnosis, from 0.0 to 1.0.'),
+    primary: DiagnosisSchema.describe('The most likely diagnosis.'),
+    otherPossibilities: z.array(DiagnosisSchema).describe('A list of other possible diagnoses, if any.'),
   }),
   diseaseInfo: z.object({
       summary: z.string().describe('A short summary of the disease.'),
@@ -59,15 +64,15 @@ const initialAnalysisPrompt = ai.definePrompt({
     }),
     diagnosis: z.object({
       isHealthy: z.boolean().describe('Whether or not the plant appears to be healthy.'),
-      disease: z.string().optional().describe('The name of the disease, if the plant is not healthy.'),
-      confidence: z.number().describe('The confidence score of the diagnosis, from 0.0 to 1.0.'),
+      primary: DiagnosisSchema.describe('The most likely diagnosis.'),
+      otherPossibilities: z.array(DiagnosisSchema).describe('A list of other possible diagnoses, up to 2 others, ordered by confidence.'),
     }),
   }) },
   prompt: `You are an expert botanist and plant pathologist. You will act as a modern deep learning CNN model to analyze the provided image.
 
   1.  **Feature Extraction**: Analyze the image for key visual features like spots, discoloration, texture, and shape.
   2.  **Identification**: Based on the extracted features, identify the plant species. If it's not a plant, indicate that.
-  3.  **Diagnosis**: Classify the plant's health. Determine if it's healthy or shows signs of a disease from your knowledge base of over 80,000 diseases. If a disease is present, provide its name and a confidence score.
+  3.  **Diagnosis**: Classify the plant's health. Determine if it's healthy or shows signs of a disease from your knowledge base of over 80,000 diseases. If a disease is present, provide the most likely diagnosis as 'primary'. If there are other possibilities, provide up to two other potential diseases in the 'otherPossibilities' array, sorted by confidence.
 
   Use the following image as the primary source for your analysis.
 
@@ -83,13 +88,13 @@ const analyzeImageFlow = ai.defineFlow(
   async input => {
     const { output: initialAnalysis } = await initialAnalysisPrompt(input);
 
-    if (!initialAnalysis || initialAnalysis.diagnosis.isHealthy || !initialAnalysis.diagnosis.disease) {
+    if (!initialAnalysis || initialAnalysis.diagnosis.isHealthy || !initialAnalysis.diagnosis.primary.disease) {
       return {
         ...initialAnalysis!,
       };
     }
 
-    const diseaseName = initialAnalysis.diagnosis.disease;
+    const diseaseName = initialAnalysis.diagnosis.primary.disease;
 
     const [summaryResult, treatmentsResult] = await Promise.all([
       generateDiseaseSummary({ diseaseName }),

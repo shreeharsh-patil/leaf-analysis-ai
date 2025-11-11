@@ -17,7 +17,8 @@ import {
   HelpingHand,
   ZoomIn,
   History,
-  Trash2
+  Trash2,
+  Lightbulb
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,6 +42,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
+type Diagnosis = {
+  disease?: string;
+  confidence: number;
+};
+
 type PredictionResult = {
   name: string;
   confidence: number;
@@ -49,6 +55,7 @@ type PredictionResult = {
   causes: string[];
   symptoms: string[];
   isHealthy: boolean;
+  otherPossibilities: Diagnosis[];
 };
 
 type HistoryItem = {
@@ -164,23 +171,25 @@ export default function LeafAnalysisClient() {
       if (isHealthy) {
         newPrediction = {
           name: "Healthy",
-          confidence: result.diagnosis.confidence,
+          confidence: result.diagnosis.primary.confidence,
           summary: "The leaf appears to be healthy.",
           treatments: [],
           causes: [],
           symptoms: [],
           isHealthy: true,
+          otherPossibilities: [],
         };
       } else {
-        const diseaseName = result.diagnosis.disease || result.identification.commonName;
+        const diseaseName = result.diagnosis.primary.disease || result.identification.commonName;
         newPrediction = {
           name: diseaseName,
-          confidence: result.diagnosis.confidence,
+          confidence: result.diagnosis.primary.confidence,
           summary: result.diseaseInfo?.summary || "No summary available.",
           causes: result.diseaseInfo?.causes || [],
           symptoms: result.diseaseInfo?.symptoms || [],
           treatments: result.diseaseInfo?.treatments || [],
           isHealthy: false,
+          otherPossibilities: result.diagnosis.otherPossibilities || [],
         };
       }
       setPredictionResult(newPrediction);
@@ -412,6 +421,30 @@ export default function LeafAnalysisClient() {
                 </Card>
             )}
           </div>
+        )}
+        {!predictionResult?.isHealthy && predictionResult?.otherPossibilities && predictionResult.otherPossibilities.length > 0 && (
+          <Card className="shadow-2xl shadow-black/20 border border-border/20 bg-card/20 backdrop-blur-xl rounded-3xl">
+            <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                    <Lightbulb className="text-primary"/>
+                    Other Possibilities
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <ul className="space-y-3">
+                    {predictionResult.otherPossibilities.map((possibility, index) => (
+                        <li key={index} className="p-3 bg-background/50 rounded-lg">
+                            <div className="flex justify-between items-center">
+                                <p className="font-semibold">{possibility.disease}</p>
+                                <span className={cn("text-sm font-medium", getConfidenceInfo(possibility.confidence).color)}>
+                                    {Math.round(possibility.confidence * 100)}%
+                                </span>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+            </CardContent>
+        </Card>
         )}
         {!predictionResult?.isHealthy && renderQuestionSection()}
       </div>
