@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from "react";
@@ -603,7 +604,7 @@ export default function LeafAnalysisClient() {
         variant="ghost"
         size="icon"
         onClick={() => setIsHistoryOpen(true)}
-        className="fixed top-5 right-24 z-50 h-12 w-12 rounded-full bg-background/50 backdrop-blur-sm border border-transparent hover:border-primary/50 transition-colors hidden md:flex"
+        className="fixed bottom-5 right-5 z-50 h-12 w-12 rounded-full bg-background/50 backdrop-blur-sm border border-transparent hover:border-primary/50 transition-colors hidden md:flex"
       >
         <History className="h-6 w-6" />
       </Button>
@@ -629,5 +630,7 @@ export default function LeafAnalysisClient() {
     </section>
   );
 }
+
+    
 
     
