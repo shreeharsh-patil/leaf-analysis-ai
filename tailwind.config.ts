@@ -10,8 +10,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['Dancing Script', 'cursive'],
-        headline: ['Dancing Script', 'cursive'],
+        body: ['PT Sans', 'sans-serif'],
+        headline: ['Times New Roman', 'serif'],
         code: ['monospace'],
       },
       colors: {
