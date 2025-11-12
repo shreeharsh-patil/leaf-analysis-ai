@@ -281,7 +281,7 @@ export default function LeafAnalysisClient() {
       <div className="text-center cursor-pointer group">
         <ScanLine className="w-24 h-24 text-muted-foreground/50 mx-auto mb-6 transition-all duration-300 group-hover:scale-110 group-hover:text-primary" />
         <h2 className="text-3xl font-bold mb-2">Tap here or drop a leaf photo</h2>
-        <p className="text-muted-foreground mb-6 text-lg">
+        <p className="text-muted-foreground mb-6 text-lg font-headline">
           Upload an image to get an AI-powered analysis of your plant's health.
         </p>
       </div>
@@ -332,7 +332,7 @@ export default function LeafAnalysisClient() {
                 <div className="flex flex-col items-center justify-center h-full gap-4 p-8 bg-card/10 backdrop-blur-lg rounded-3xl shadow-lg border border-border/10 animate-in fade-in-50 duration-500">
                     <Leaf className="w-16 h-16 text-primary" />
                     <h2 className="text-3xl font-bold">Ready to Analyze</h2>
-                    <p className="text-muted-foreground text-center max-w-sm">Click the button below to start the AI-powered disease prediction.</p>
+                    <p className="text-muted-foreground text-center max-w-sm font-headline">Click the button below to start the AI-powered disease prediction.</p>
                     <Button onClick={handleAnalyze} size="lg" className="mt-4 text-lg py-7 px-10 rounded-full shadow-lg shadow-primary/20">
                         <Sparkles className="mr-3 h-6 w-6" />
                         Analyze Leaf
@@ -386,7 +386,7 @@ export default function LeafAnalysisClient() {
                 </div>
             </CardHeader>
             <CardContent>
-                <p className="text-muted-foreground text-base">{predictionResult?.summary}</p>
+                <p className="text-muted-foreground text-base font-headline">{predictionResult?.summary}</p>
             </CardContent>
         </Card>
 
@@ -401,7 +401,7 @@ export default function LeafAnalysisClient() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <ul className="list-disc pl-5 text-muted-foreground space-y-2">
+                        <ul className="list-disc pl-5 text-muted-foreground space-y-2 font-headline">
                            {predictionResult.causes.map((cause, index) => <li key={index}>{cause}</li>)}
                         </ul>
                     </CardContent>
@@ -416,37 +416,13 @@ export default function LeafAnalysisClient() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                         <ul className="list-disc pl-5 text-muted-foreground space-y-2">
+                         <ul className="list-disc pl-5 text-muted-foreground space-y-2 font-headline">
                            {predictionResult.treatments.map((treatment, index) => <li key={index}>{treatment}</li>)}
                         </ul>
                     </CardContent>
                 </Card>
             )}
           </div>
-        )}
-        {!predictionResult?.isHealthy && predictionResult?.otherPossibilities && predictionResult.otherPossibilities.length > 0 && (
-          <Card className="shadow-2xl shadow-black/20 border border-border/20 bg-card/20 backdrop-blur-xl rounded-3xl">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-2xl">
-                    <Lightbulb className="text-primary"/>
-                    Other Possibilities
-                </CardTitle>
-            </CardHeader>
-            <CardContent>
-                <ul className="space-y-3">
-                    {predictionResult.otherPossibilities.map((possibility, index) => (
-                        <li key={index} className="p-3 bg-background/50 rounded-lg">
-                            <div className="flex justify-between items-center">
-                                <p className="font-semibold">{possibility.disease}</p>
-                                <span className={cn("text-sm font-medium", getConfidenceInfo(possibility.confidence).color)}>
-                                    {Math.round(possibility.confidence * 100)}%
-                                </span>
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-            </CardContent>
-        </Card>
         )}
         {!predictionResult?.isHealthy && renderQuestionSection()}
       </div>
@@ -467,6 +443,7 @@ export default function LeafAnalysisClient() {
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             disabled={isAsking}
+            className="font-headline"
           />
           <Button onClick={handleAskQuestion} disabled={!question || isAsking}>
             {isAsking ? (
@@ -486,7 +463,7 @@ export default function LeafAnalysisClient() {
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
-              <p className="text-muted-foreground">Generating answer...</p>
+              <p className="text-muted-foreground font-headline">Generating answer...</p>
             </div>
           </CardContent>
         </Card>
@@ -500,7 +477,7 @@ export default function LeafAnalysisClient() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground">{answer}</p>
+            <p className="text-muted-foreground font-headline">{answer}</p>
           </CardContent>
         </Card>
       )}
@@ -640,3 +617,5 @@ export default function LeafAnalysisClient() {
     </>
   );
 }
+
+    
