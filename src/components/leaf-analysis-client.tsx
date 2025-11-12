@@ -19,7 +19,8 @@ import {
   ZoomIn,
   History,
   Trash2,
-  Lightbulb
+  Lightbulb,
+  CalendarDays,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,11 +44,24 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import Link from "next/link";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 
 type Diagnosis = {
   disease?: string;
   confidence: number;
 };
+
+type DayPlan = {
+    day: number;
+    title: string;
+    description: string;
+    icon?: string;
+}
 
 type PredictionResult = {
   name: string;
@@ -58,6 +72,7 @@ type PredictionResult = {
   symptoms: string[];
   isHealthy: boolean;
   otherPossibilities: Diagnosis[];
+  sevenDayPlan?: DayPlan[];
 };
 
 type HistoryItem = {
@@ -192,6 +207,7 @@ export default function LeafAnalysisClient() {
           treatments: result.diseaseInfo?.treatments || [],
           isHealthy: false,
           otherPossibilities: result.diagnosis.otherPossibilities || [],
+          sevenDayPlan: result.sevenDayPlan,
         };
       }
       setPredictionResult(newPrediction);
@@ -424,9 +440,43 @@ export default function LeafAnalysisClient() {
             )}
           </div>
         )}
+        {predictionResult?.sevenDayPlan && render7DayPlan()}
         {!predictionResult?.isHealthy && renderQuestionSection()}
       </div>
   )};
+
+    const render7DayPlan = () => {
+    if (!predictionResult?.sevenDayPlan || predictionResult.sevenDayPlan.length === 0) return null;
+
+    return (
+      <Card className="shadow-2xl shadow-black/20 border border-border/20 bg-card/20 backdrop-blur-xl rounded-3xl">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3 text-2xl">
+            <CalendarDays className="text-primary"/>
+            Your 7-Day Recovery Plan
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Accordion type="single" collapsible className="w-full" defaultValue="item-0">
+            {predictionResult.sevenDayPlan.map((day, index) => (
+              <AccordionItem value={`item-${index}`} key={index}>
+                <AccordionTrigger className="text-lg font-bold">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{day.icon || '🗓️'}</span>
+                    Day {day.day}: {day.title}
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="text-base text-muted-foreground font-headline pl-11">
+                  {day.description}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </CardContent>
+      </Card>
+    );
+  };
+
 
   const renderQuestionSection = () => (
     <div className="flex flex-col gap-6">

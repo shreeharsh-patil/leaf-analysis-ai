@@ -4,15 +4,16 @@
  * @fileOverview An AI flow for analyzing an image of a leaf to identify the plant and diagnose its health.
  *
  * - analyzeImage - A function that takes a leaf image and returns a comprehensive analysis,
- *   including diagnosis, summary, causes, symptoms, and treatments.
+ *   including diagnosis, summary, causes, symptoms, treatments, and a 7-day plan.
  * - AnalyzeImageInput - The input type for the analyzeImage function.
  * - AnalyzeImageOutput - The return type for the analyzeImage function.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { suggestTreatmentsForDisease, SuggestTreatmentsForDiseaseOutputSchema } from './suggest-treatments-for-disease';
-import { generateDiseaseSummary, GenerateDiseaseSummaryOutputSchema } from './generate-disease-summary';
+import { suggestTreatmentsForDisease } from './suggest-treatments-for-disease';
+import { generateDiseaseSummary } from './generate-disease-summary';
+import { generate7DayPlan, DayPlanSchema } from './generate-7-day-plan';
 
 
 const AnalyzeImageInputSchema = z.object({
@@ -46,6 +47,7 @@ const AnalyzeImageOutputSchema = z.object({
       symptoms: z.array(z.string()).describe('A list of common symptoms for the disease.'),
       treatments: z.array(z.string()).describe('A list of potential treatments for the disease.'),
   }).optional(),
+  sevenDayPlan: z.array(DayPlanSchema).optional().describe('A 7-day improvement plan for the plant.'),
 });
 export type AnalyzeImageOutput = z.infer<typeof AnalyzeImageOutputSchema>;
 
@@ -95,11 +97,18 @@ const analyzeImageFlow = ai.defineFlow(
     }
 
     const diseaseName = initialAnalysis.diagnosis.primary.disease;
+    const commonName = initialAnalysis.identification.commonName;
 
     const [summaryResult, treatmentsResult] = await Promise.all([
       generateDiseaseSummary({ diseaseName }),
       suggestTreatmentsForDisease({ diseaseName }),
     ]);
+
+    const planResult = await generate7DayPlan({ 
+        diseaseName, 
+        commonName,
+        treatments: treatmentsResult.treatments,
+    });
 
     return {
       ...initialAnalysis,
@@ -109,6 +118,7 @@ const analyzeImageFlow = ai.defineFlow(
         symptoms: summaryResult.symptoms,
         treatments: treatmentsResult.treatments,
       },
+      sevenDayPlan: planResult.plan,
     };
   }
 );
