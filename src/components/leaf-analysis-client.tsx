@@ -42,6 +42,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import Link from "next/link";
 
 type Diagnosis = {
   disease?: string;
@@ -508,14 +509,6 @@ export default function LeafAnalysisClient() {
 
   const renderHistorySidebar = () => (
     <>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => setIsHistoryOpen(!isHistoryOpen)}
-        className="fixed top-5 right-5 z-50 h-12 w-12 rounded-full bg-background/50 backdrop-blur-sm border border-transparent hover:border-primary/50 transition-colors md:hidden"
-      >
-        <History className="h-6 w-6" />
-      </Button>
       <div
         className={cn(
           "fixed top-0 right-0 h-full z-40 bg-background/80 backdrop-blur-lg border-l border-border/20 transition-transform duration-300 ease-in-out",
@@ -599,17 +592,33 @@ export default function LeafAnalysisClient() {
 
 
   return (
+    <>
+    <header className="fixed top-0 z-50 w-full bg-transparent">
+        <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="bg-background/50 backdrop-blur-sm p-2 rounded-full border border-transparent group-hover:border-primary/50 transition-colors">
+              <Leaf className="h-6 w-6 text-primary" />
+            </div>
+            <h1 className="text-2xl font-cursive tracking-tight text-foreground/80 group-hover:text-foreground transition-colors">Leaf Analysis</h1>
+          </Link>
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" asChild>
+              <Link href="/">Home</Link>
+            </Button>
+            <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsHistoryOpen(!isHistoryOpen)}
+                className="rounded-full bg-background/50 backdrop-blur-sm border border-transparent hover:border-primary/50 transition-colors"
+              >
+                <History className="h-6 w-6" />
+                <span className="sr-only">Toggle History</span>
+              </Button>
+          </div>
+        </div>
+      </header>
     <section className="relative container mx-auto px-4 md:px-6 py-12 min-h-screen flex flex-col items-center justify-center">
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => setIsHistoryOpen(true)}
-        className="fixed bottom-5 right-5 z-50 h-12 w-12 rounded-full bg-background/50 backdrop-blur-sm border border-transparent hover:border-primary/50 transition-colors hidden md:flex"
-      >
-        <History className="h-6 w-6" />
-      </Button>
       {renderHistorySidebar()}
-
        <div 
         className="absolute inset-0 z-0 opacity-20"
         style={{
@@ -628,9 +637,6 @@ export default function LeafAnalysisClient() {
             {image ? renderAnalysisState() : renderInitialState()}
         </div>
     </section>
+    </>
   );
 }
-
-    
-
-    
