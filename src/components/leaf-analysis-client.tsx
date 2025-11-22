@@ -27,7 +27,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { analyzeImage, DayPlan } from "@/ai/flows/analyze-image-flow";
+import { analyzeImage } from "@/ai/flows/analyze-image-flow";
 import { Textarea } from "@/components/ui/textarea";
 import { askQuestionAboutDisease } from "@/app/actions";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -50,6 +50,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import type { DayPlan } from "@/app/types";
 
 type Diagnosis = {
   disease?: string;
