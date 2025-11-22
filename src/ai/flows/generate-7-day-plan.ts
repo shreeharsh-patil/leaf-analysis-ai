@@ -45,7 +45,7 @@ const prompt = ai.definePrompt({
   - Each day should have a clear title and a description of the actions to take.
   - Incorporate the suggested treatments into the plan. Start with the most critical actions first.
   - Include general plant care tips (e.g., watering, light, monitoring) appropriate for recovery.
-  - Add a relevant emoji for each day's task (e.g., ✂️ for pruning,💧for watering, 観察 for monitoring).
+  - Add a relevant emoji for each day's task (e.g., ✂️ for pruning,💧for watering, 👀 for monitoring).
   - Day 1 should focus on initial setup and treatment application.
   - Mid-week should be about monitoring and continued care.
   - Day 7 should be a final assessment and advice for ongoing care.
