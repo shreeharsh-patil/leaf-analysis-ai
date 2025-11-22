@@ -73,7 +73,7 @@ const initialAnalysisPrompt = ai.definePrompt({
       latinName: z.string().describe('The Latin name of the identified plant.'),
     }),
     diagnosis: z.object({
-      isHealthy: zboolean().describe('Whether or not the plant appears to be healthy.'),
+      isHealthy: z.boolean().describe('Whether or not the plant appears to be healthy.'),
       primary: DiagnosisSchema.describe('The most likely diagnosis.'),
       otherPossibilities: z.array(DiagnosisSchema).describe('A list of other possible diagnoses, up to 2 others, ordered by confidence.'),
     }),
