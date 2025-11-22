@@ -10,6 +10,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+import { DayPlanSchema } from './analyze-image-flow';
 
 const Generate7DayPlanInputSchema = z.object({
   diseaseName: z.string().describe('The name of the plant disease.'),
@@ -17,15 +18,6 @@ const Generate7DayPlanInputSchema = z.object({
   treatments: z.array(z.string()).describe('A list of suggested treatments.'),
 });
 export type Generate7DayPlanInput = z.infer<typeof Generate7DayPlanInputSchema>;
-
-export const DayPlanSchema = z.object({
-  day: z.number().describe('The day number (1-7).'),
-  title: z.string().describe('A short title for the day\'s tasks.'),
-  description: z.string().describe('A detailed description of the tasks for the day.'),
-  icon: z.string().optional().describe('An emoji representing the day\'s main activity.'),
-});
-export type DayPlan = z.infer<typeof DayPlanSchema>;
-
 
 const Generate7DayPlanOutputSchema = z.object({
   plan: z.array(DayPlanSchema).describe('A 7-day improvement plan with daily tasks.'),

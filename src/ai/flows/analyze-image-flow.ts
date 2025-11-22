@@ -13,7 +13,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { suggestTreatmentsForDisease } from './suggest-treatments-for-disease';
 import { generateDiseaseSummary } from './generate-disease-summary';
-import { generate7DayPlan, DayPlanSchema } from './generate-7-day-plan';
+import { generate7DayPlan } from './generate-7-day-plan';
 
 
 const AnalyzeImageInputSchema = z.object({
@@ -29,6 +29,14 @@ const DiagnosisSchema = z.object({
     disease: z.string().optional().describe('The name of the disease, if the plant is not healthy.'),
     confidence: z.number().describe('The confidence score of the diagnosis, from 0.0 to 1.0.'),
 });
+
+export const DayPlanSchema = z.object({
+  day: z.number().describe('The day number (1-7).'),
+  title: z.string().describe('A short title for the day\'s tasks.'),
+  description: z.string().describe('A detailed description of the tasks for the day.'),
+  icon: z.string().optional().describe('An emoji representing the day\'s main activity.'),
+});
+export type DayPlan = z.infer<typeof DayPlanSchema>;
 
 const AnalyzeImageOutputSchema = z.object({
   identification: z.object({

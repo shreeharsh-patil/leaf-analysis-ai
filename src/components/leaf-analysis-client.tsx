@@ -27,7 +27,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { analyzeImage } from "@/ai/flows/analyze-image-flow";
+import { analyzeImage, DayPlan } from "@/ai/flows/analyze-image-flow";
 import { Textarea } from "@/components/ui/textarea";
 import { askQuestionAboutDisease } from "@/app/actions";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -55,13 +55,6 @@ type Diagnosis = {
   disease?: string;
   confidence: number;
 };
-
-type DayPlan = {
-    day: number;
-    title: string;
-    description: string;
-    icon?: string;
-}
 
 type PredictionResult = {
   name: string;
@@ -667,5 +660,3 @@ export default function LeafAnalysisClient() {
     </>
   );
 }
-
-    
