@@ -13,7 +13,6 @@ import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { suggestTreatmentsForDisease } from './suggest-treatments-for-disease';
 import { generateDiseaseSummary } from './generate-disease-summary';
-import { generate7DayPlan } from './generate-7-day-plan';
 
 
 const AnalyzeImageInputSchema = z.object({
@@ -89,6 +88,39 @@ const initialAnalysisPrompt = ai.definePrompt({
   Photo: {{media url=photoDataUri}}`,
 });
 
+const generate7DayPlanPrompt = ai.definePrompt({
+  name: 'generate7DayPlanPrompt',
+  input: { schema: z.object({
+    diseaseName: z.string().describe('The name of the plant disease.'),
+    commonName: z.string().describe('The common name of the plant.'),
+    treatments: z.array(z.string()).describe('A list of suggested treatments.'),
+  }) },
+  output: { schema: z.object({
+    plan: z.array(DayPlanSchema).describe('A 7-day improvement plan with daily tasks.'),
+  }) },
+  prompt: `You are an expert botanist creating a 7-day recovery plan for a plant.
+
+  Plant Details:
+  - Species: {{{commonName}}}
+  - Diagnosed with: {{{diseaseName}}}
+  - Suggested Treatments: {{#each treatments}}- {{{this}}}\n{{/each}}
+
+  Your Task:
+  Create a simple, actionable 7-day plan to help the user treat their plant and nurse it back to health.
+  - The plan should be easy for a beginner to follow.
+  - Each day should have a clear title and a description of the actions to take.
+  - Incorporate the suggested treatments into the plan. Start with the most critical actions first.
+  - Include general plant care tips (e.g., watering, light, monitoring) appropriate for recovery.
+  - Add a relevant emoji for each day's task (e.g., ✂️ for pruning,💧for watering, 👀 for monitoring).
+  - Day 1 should focus on initial setup and treatment application.
+  - Mid-week should be about monitoring and continued care.
+  - Day 7 should be a final assessment and advice for ongoing care.
+  - Be encouraging and supportive in your tone.
+  
+  Generate a JSON object for the 7-day plan.`,
+});
+
+
 const analyzeImageFlow = ai.defineFlow(
   {
     name: 'analyzeImageFlow',
@@ -111,8 +143,8 @@ const analyzeImageFlow = ai.defineFlow(
       generateDiseaseSummary({ diseaseName }),
       suggestTreatmentsForDisease({ diseaseName }),
     ]);
-
-    const planResult = await generate7DayPlan({ 
+    
+    const { output: planResult } = await generate7DayPlanPrompt({ 
         diseaseName, 
         commonName,
         treatments: treatmentsResult.treatments,
@@ -126,7 +158,7 @@ const analyzeImageFlow = ai.defineFlow(
         symptoms: summaryResult.symptoms,
         treatments: treatmentsResult.treatments,
       },
-      sevenDayPlan: planResult.plan,
+      sevenDayPlan: planResult?.plan,
     };
   }
 );
