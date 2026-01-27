@@ -1,4 +1,4 @@
-s cc# Firebase Studio
+
 
 This is a NextJS project 
 
