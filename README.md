@@ -1,38 +1,64 @@
-# Leaf Analysis - Local Setup
+<h1>🌿 Leafy AI – Plant Disease Detection & Analysis</h1>
 
-This is a Next.js 15 application powered by Genkit and Gemini for plant disease detection.
+Leafy AI is a modern web application built with Next.js and AI-powered workflows to analyze plant leaves, detect diseases, and suggest treatments. It helps farmers, researchers, and students quickly identify plant health issues using images and intelligent recommendations.
 
-## Prerequisites
+<h3>🚀 Features</h3>
+<br>📸 Leaf Image Analysis – Upload images and detect plant diseases
+<br>🧠 AI-Powered Insights – Uses intelligent flows for diagnosis
+<br>🩺 Disease Summary – Get detailed explanations of detected diseases
+<br>💊 Treatment Suggestions – Recommended remedies and solutions
+<br>💬 Question Answering – Ask plant-related queries
+<br>📱 Responsive UI – Works across desktop and mobile devices
 
-- Node.js (v18 or later)
-- An API key from [Google AI Studio](https://aistudio.google.com/)
 
-## Local Development Instructions
+<h3>🛠️ Tech Stack</h3>
+<br>Frontend: Next.js, React, TypeScript
+<br>Styling: Tailwind CSS
+<br>AI Integration: Genkit / Custom AI flows
+<br>UI Components: Custom + reusable component library
 
-1. **Install Dependencies:**
-   ```bash
-   npm install
-   ```
+<h3>🧠 AI Workflows</h3>
+<br>answer-question-flow.ts → Handles user queries
+<br>generate-disease-summary.ts → Creates disease descriptions
+<br>suggest-treatments-for-disease.ts → Provides treatment options
+<br>analyze-image-flow.ts → Core image analysis logic
 
-2. **Configure Environment Variables:**
-   - Copy `.env.example` to `.env`.
-   - Add your `GOOGLE_GENAI_API_KEY` to the `.env` file.
+<h3>🏗️ Project Structure</h3>
 
-3. **Run the Development Server:**
-   ```bash
-   npm run dev
-   ```
-   Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-4. **Run Genkit Developer UI (Optional):**
-   If you want to debug or test the AI flows directly:
-   ```bash
-   npm run genkit:dev
-   ```
-
-## Tech Stack
-
-- **Framework:** Next.js 15 (App Router)
-- **AI Engine:** Genkit with Google Generative AI (Gemini 2.5 Flash)
-- **UI Components:** ShadCN UI & Tailwind CSS
-- **Icons:** Lucide React
+```bash
+.
+├── src/
+│   ├── app/                # App routing and pages (Next.js)
+│   │   ├── analysis/
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   ├── actions.ts
+│   │   ├── types.ts
+│   │   └── globals.css
+│   │
+│   ├── components/         # UI and client components
+│   │   ├── ui/
+│   │   ├── leafy-ai-client.tsx
+│   │   └── leaf-analysis-client.tsx
+│   │
+│   ├── ai/                 # AI logic and workflows
+│   │   ├── flows/
+│   │   ├── genkit.ts
+│   │   └── dev.ts
+│   │
+│   ├── lib/                # Utility functions
+│   │   └── utils.ts
+│   │
+│   └── hooks/              # Custom React hooks
+│       ├── use-mobile.tsx
+│       └── use-toast.ts
+│
+├── docs/
+│   └── blueprint.md
+├── public/
+├── package.json
+├── tailwind.config.ts
+├── next.config.ts
+└── README.md
+```
