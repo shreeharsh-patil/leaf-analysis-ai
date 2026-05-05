@@ -2,12 +2,14 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ['@genkit-ai/core', 'genkit', '@opentelemetry/sdk-node', '@opentelemetry/exporter-jaeger'],
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
+  },
   /* config options here */
   typescript: {
     ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
   },
   images: {
     remotePatterns: [

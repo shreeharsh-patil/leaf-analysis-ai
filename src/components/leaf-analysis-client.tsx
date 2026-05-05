@@ -224,12 +224,12 @@ export default function LeafAnalysisClient() {
       };
       updateHistory([newHistoryItem, ...history]);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Analysis failed:", error);
       toast({
         variant: "destructive",
         title: "Analysis Failed",
-        description: "Could not analyze the image. Please try again.",
+        description: error.message || "Could not analyze the image. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -250,12 +250,12 @@ export default function LeafAnalysisClient() {
         question: question,
       });
       setAnswer(result.answer);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to ask question:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to get an answer. Please try again.",
+        description: error.message || "Failed to get an answer. Please try again.",
       });
     } finally {
       setIsAsking(false);
