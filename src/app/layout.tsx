@@ -2,6 +2,8 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
+export const maxDuration = 60;
+
 export const metadata: Metadata = {
   title: 'Leaf Analysis',
   description: 'AI-powered plant disease detection',
